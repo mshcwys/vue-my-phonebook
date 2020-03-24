@@ -1,5 +1,6 @@
 # vue-my-phonebook
-
+项目说明
+使用vue cli和element ui完成的电话本
 ## Project setup
 ```
 npm install
