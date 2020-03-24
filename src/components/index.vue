@@ -1,7 +1,7 @@
 <template>
   <div id="phonebook">
     <h1>电话本</h1>
-    <div class="head">
+    <div class="head" @func="loadComments">
       <el-row :gutter="10">
         <el-col :span="7">
           <el-input
@@ -51,6 +51,7 @@
           </template>
         </el-table-column>
       </el-table>
+      <!-- 编辑信息 -->
       <el-dialog title="编辑联系人" :visible.sync="dialogVisible" width="30%">
         <div>
           <el-form ref="form" :model="editInfo" label-width="80px">
@@ -85,13 +86,7 @@ export default {
         number: "",
         note: ""
       },
-      tableData: [
-        {
-          name: "张三",
-          number: "13323332333",
-          note: "法外狂徒"
-        }
-      ],
+      tableData: [],
       dialogVisible: false,
       editInfo: {
         name: "",
@@ -134,28 +129,38 @@ export default {
       //不进行备注时自动填写无
       if (!this.contactsInfo.note) {
         this.contactsInfo.note = "无";
-        this.tableData.push(this.contactsInfo);
+        this.tableData = JSON.parse(localStorage.getItem("msg") || "[]");
+        this.tableData.unshift(this.contactsInfo);
+        //重新保存最新的评论数据
+        localStorage.setItem("msg", JSON.stringify(this.tableData));
         this.contactsInfo = {
           //清空输入框
           name: "",
           number: "",
           note: ""
         };
+        this.$emit("func");
         return;
       }
-      this.tableData.push(this.contactsInfo);
+      this.tableData = JSON.parse(localStorage.getItem("msg") || "[]");
+      this.tableData.unshift(this.contactsInfo);
+      //重新保存最新的评论数据
+      localStorage.setItem("msg", JSON.stringify(this.tableData));
       this.contactsInfo = {
         //清空输入框
         name: "",
         number: "",
         note: ""
       };
+      this.$emit("func");
     },
     //删除数据
     delInfo(idx) {
       this.$confirm("确认删除？")
         .then(() => {
+          this.tableData = JSON.parse(localStorage.getItem("msg") || "[]");
           this.tableData.splice(idx, 1);
+          localStorage.setItem("msg", JSON.stringify(this.tableData));
         })
         .catch(() => {});
     },
@@ -170,11 +175,28 @@ export default {
       this.dialogVisible = true;
     },
     confirm() {
+      
+      this.tableData = JSON.parse(localStorage.getItem("msg") || "[]");
       Vue.set(this.tableData, this.saveIndex, this.editInfo);
+      //重新保存最新的评论数据
+      localStorage.setItem("msg", JSON.stringify(this.tableData));
       this.dialogVisible = false;
+    },
+    //从本地加载评论列表
+    loadComments() {
+      this.tableData = JSON.parse(localStorage.getItem("msg") || "[]");
     }
+  },
+  created() {
+    this.loadComments();
   }
 };
 </script>
 <style  scoped>
+h1{
+      margin: 20px 0;
+}
+.head{
+    margin-bottom: 20px;
+}
 </style>
